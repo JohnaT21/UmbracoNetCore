@@ -1,0 +1,163 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<ContentModels.Search>
+@using ContentModels = Umbraco.Cms.Web.Common.PublishedModels;
+@{
+	Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Search Engine</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f8f8f8;
+    }
+    
+    h1 {
+      margin-top: 0;
+      color: #333;
+    }
+    
+    #searchForm {
+      margin-bottom: 20px;
+    }
+    
+    #searchInput {
+      width: 300px;
+      padding: 10px;
+      font-size: 16px;
+    }
+    
+    #searchButton {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4caf50;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+    
+    #searchButton:hover {
+      background-color: #45a049;
+    }
+    
+    #searchResults {
+      border: 1px solid #ccc;
+      padding: 20px;
+      background-color: #fff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      border-radius: 4px;
+    }
+    
+    .resultItem {
+      margin-bottom: 20px;
+      padding: 10px;
+      background-color: #f8f8f8;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .resultName {
+      font-size: 20px;
+      font-weight: bold;
+      margin: 0;
+      color: #333;
+    }
+    
+    .resultTitle {
+      font-size: 16px;
+      margin: 5px 0;
+      color: #666;
+    }
+    
+    .resultBody {
+      margin: 0;
+      color: #333;
+    }
+    
+    .noResults {
+      font-style: italic;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <h1>Search Engine</h1>
+    <div>
+      <form id="searchForm">
+        <input type="text" id="searchInput" placeholder="Enter your search query" />
+        <input type="submit" id="searchButton" value="Search" />
+      </form>
+    </div>
+    
+    <div id="searchResults">
+      <!-- Search results will be dynamically populated here -->
+    </div>
+  </div>
+  
+  <script>
+    function populateSearchResults(results) {
+      var searchResultsContainer = document.getElementById('searchResults');
+      searchResultsContainer.innerHTML = '';
+      
+      if (results.length === 0) {
+        var noResultsElement = document.createElement('p');
+        noResultsElement.textContent = 'No results found.';
+        noResultsElement.classList.add('noResults');
+        searchResultsContainer.appendChild(noResultsElement);
+      } else {
+        for (var i = 0; i < results.length; i++) {
+          var result = results[i];
+          
+          // Create elements for each item and append them to the searchResultsContainer
+          var resultItem = document.createElement('div');
+          resultItem.classList.add('resultItem');
+          
+          var resultName = document.createElement('h3');
+          resultName.classList.add('resultName');
+          
+          var resultTitle = document.createElement('p');
+          resultTitle.classList.add('resultTitle');
+          
+          var resultBody = document.createElement('p');
+          resultBody.classList.add('resultBody');
+          
+          resultName.textContent = result.name;
+          resultTitle.textContent = result.title;
+          resultBody.textContent = result.body;
+          
+          resultItem.appendChild(resultName);
+          resultItem.appendChild(resultTitle);
+          resultItem.appendChild(resultBody);
+          
+          searchResultsContainer.appendChild(resultItem);
+        }
+      }
+    }
+    
+    document.getElementById('searchForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      var searchQuery = document.getElementById('searchInput').value.toLowerCase();
+      var apiEndpoint = 'http://localhost:61777/Umbraco/Api/SearchEngine/GetContent?title=' + encodeURIComponent(searchQuery);
+      
+      // Make a GET request to the API endpoint
+      fetch(apiEndpoint)
+        .then(function(response) {
+          return response.json();
+        })
+        .then(function(data) {
+          populateSearchResults(data);
+        })
+        .catch(function(error) {
+          console.log('An error occurred:', error);
+        });
+    });
+  </script>
+</body>
+</html>
